@@ -14,6 +14,7 @@ export const API_ENDPOINTS = {
 
   // Invoice
   SERIES: "/invoice/serials",
+  PRINT_INVOICE: "/invoice/print",
   INVOICES: "/invoice",
   INVOICE_DETAIL: (id: string) => `/invoice/${id}`,
 };

@@ -7,20 +7,22 @@ import {
   ChevronRight,
   Loader2,
   Home,
-  Send, 
+  Send,
   Eye,
   Download,
   Plus,
   RefreshCw,
   Settings2,
-  GripVertical
+  GripVertical,
+  UserPen,
 } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-
 import {
-  useInvoices,
-  useInvoiceSerials,
-} from "@/hooks/use-invoice";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+import { useInvoices, useInvoiceSerials } from "@/hooks/use-invoice";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
@@ -70,35 +72,206 @@ type ColumnConfig = {
 
 const INITIAL_COLUMNS: ColumnConfig[] = [
   // Cột mặc định
-  { id: 'status', label: 'Trạng thái', isDefault: true, isVisible: true, width: 120 },
-  { id: 'taxSubmissionStatus', label: 'Trạng thái CQT', isDefault: true, isVisible: true, width: 140 },
-  { id: 'idSign', label: 'Mã CQT', isDefault: true, isVisible: true, width: 250 },
-  { id: 'invoiceSeries', label: 'Ký hiệu', isDefault: true, isVisible: true, width: 100 },
-  { id: 'invoiceIssuedDate', label: 'Ngày HĐ', isDefault: true, isVisible: true, width: 110 },
-  { id: 'invoiceNumber', label: 'Số HĐ', isDefault: true, isVisible: true, width: 100 },
-  { id: 'buyerTaxCode', label: 'Mã số thuế', isDefault: true, isVisible: true, width: 130 },
-  { id: 'buyerName', label: 'Tên khách hàng', isDefault: true, isVisible: true, width: 220 },
-  { id: 'totalAmount', label: 'Tổng tiền', isDefault: true, isVisible: true, align: 'right', width: 140 },
-  { id: 'buyerEmail', label: 'Email', isDefault: true, isVisible: true, width: 180 },
-  { id: 'buyerCitizenId', label: 'CCCD', isDefault: true, isVisible: true, width: 140 },
-  { id: 'lookupCode', label: 'Mã tra cứu', isDefault: true, isVisible: true, width: 120 },
-  { id: 'paymentMethodName', label: 'Hình thức TT', isDefault: true, isVisible: true, width: 150 },
-  { id: 'orderNumber', label: 'Số đơn hàng', isDefault: true, isVisible: true, width: 120 },
+  {
+    id: "status",
+    label: "Trạng thái",
+    isDefault: true,
+    isVisible: true,
+    width: 120,
+  },
+  {
+    id: "taxSubmissionStatus",
+    label: "Trạng thái CQT",
+    isDefault: true,
+    isVisible: true,
+    width: 140,
+  },
+  {
+    id: "idSign",
+    label: "Mã CQT",
+    isDefault: true,
+    isVisible: true,
+    width: 250,
+  },
+  {
+    id: "invoiceSeries",
+    label: "Ký hiệu",
+    isDefault: true,
+    isVisible: true,
+    width: 100,
+  },
+  {
+    id: "invoiceIssuedDate",
+    label: "Ngày HĐ",
+    isDefault: true,
+    isVisible: true,
+    width: 110,
+  },
+  {
+    id: "invoiceNumber",
+    label: "Số HĐ",
+    isDefault: true,
+    isVisible: true,
+    width: 100,
+  },
+  {
+    id: "buyerTaxCode",
+    label: "Mã số thuế",
+    isDefault: true,
+    isVisible: true,
+    width: 130,
+  },
+  {
+    id: "buyerName",
+    label: "Tên khách hàng",
+    isDefault: true,
+    isVisible: true,
+    width: 220,
+  },
+  {
+    id: "totalAmount",
+    label: "Tổng tiền",
+    isDefault: true,
+    isVisible: true,
+    align: "right",
+    width: 140,
+  },
+  {
+    id: "buyerEmail",
+    label: "Email",
+    isDefault: true,
+    isVisible: true,
+    width: 180,
+  },
+  {
+    id: "buyerCitizenId",
+    label: "CCCD",
+    isDefault: true,
+    isVisible: true,
+    width: 140,
+  },
+  {
+    id: "lookupCode",
+    label: "Mã tra cứu",
+    isDefault: true,
+    isVisible: true,
+    width: 120,
+  },
+  {
+    id: "paymentMethodName",
+    label: "Hình thức TT",
+    isDefault: true,
+    isVisible: true,
+    width: 150,
+  },
+  {
+    id: "orderNumber",
+    label: "Số đơn hàng",
+    isDefault: true,
+    isVisible: true,
+    width: 120,
+  },
   // Cột bổ sung
-  { id: 'creator', label: 'Người lập', isDefault: false, isVisible: false, width: 150 },
-  { id: 'totalAmountWithoutVat', label: 'Tổng tiền chưa thuế', isDefault: false, isVisible: false, align: 'right', width: 160 },
-  { id: 'vatAmount', label: 'Tổng tiền thuế', isDefault: false, isVisible: false, align: 'right', width: 140 },
-  { id: 'sellerAddress', label: 'Địa chỉ người bán', isDefault: false, isVisible: false, width: 250 },
-  { id: 'currency', label: 'Đơn vị tiền tệ', isDefault: false, isVisible: false, width: 120 },
-  { id: 'exchangeRate', label: 'Tỷ giá', isDefault: false, isVisible: false, width: 100 },
-  { id: 'buyerLegalName', label: 'Tên đơn vị', isDefault: false, isVisible: false, width: 220 },
-  { id: 'buyerAddressLine', label: 'Địa chỉ người mua', isDefault: false, isVisible: false, width: 250 },
-  { id: 'storeName', label: 'Tên cửa hàng', isDefault: false, isVisible: false, width: 180 },
-  { id: 'storeAddress', label: 'Địa chỉ cửa hàng', isDefault: false, isVisible: false, width: 250 },
-  { id: 'storeId', label: 'Mã cửa hàng', isDefault: false, isVisible: false, width: 120 },
-  { id: 'buyerBudgetRelationCode', label: 'Mã ĐVQHNS', isDefault: false, isVisible: false, width: 150 },
-  { id: 'buyerPassport', label: 'Hộ chiếu', isDefault: false, isVisible: false, width: 140 },
-  { id: 'totalAmountInWords', label: 'Tổng tiền bằng chữ', isDefault: false, isVisible: false, width: 300 },
+  {
+    id: "creator",
+    label: "Người lập",
+    isDefault: false,
+    isVisible: false,
+    width: 150,
+  },
+  {
+    id: "totalAmountWithoutVat",
+    label: "Tổng tiền chưa thuế",
+    isDefault: false,
+    isVisible: false,
+    align: "right",
+    width: 160,
+  },
+  {
+    id: "vatAmount",
+    label: "Tổng tiền thuế",
+    isDefault: false,
+    isVisible: false,
+    align: "right",
+    width: 140,
+  },
+  {
+    id: "sellerAddress",
+    label: "Địa chỉ người bán",
+    isDefault: false,
+    isVisible: false,
+    width: 250,
+  },
+  {
+    id: "currency",
+    label: "Đơn vị tiền tệ",
+    isDefault: false,
+    isVisible: false,
+    width: 120,
+  },
+  {
+    id: "exchangeRate",
+    label: "Tỷ giá",
+    isDefault: false,
+    isVisible: false,
+    width: 100,
+  },
+  {
+    id: "buyerLegalName",
+    label: "Tên đơn vị",
+    isDefault: false,
+    isVisible: false,
+    width: 220,
+  },
+  {
+    id: "buyerAddressLine",
+    label: "Địa chỉ người mua",
+    isDefault: false,
+    isVisible: false,
+    width: 250,
+  },
+  {
+    id: "storeName",
+    label: "Tên cửa hàng",
+    isDefault: false,
+    isVisible: false,
+    width: 180,
+  },
+  {
+    id: "storeAddress",
+    label: "Địa chỉ cửa hàng",
+    isDefault: false,
+    isVisible: false,
+    width: 250,
+  },
+  {
+    id: "storeId",
+    label: "Mã cửa hàng",
+    isDefault: false,
+    isVisible: false,
+    width: 120,
+  },
+  {
+    id: "buyerBudgetRelationCode",
+    label: "Mã ĐVQHNS",
+    isDefault: false,
+    isVisible: false,
+    width: 150,
+  },
+  {
+    id: "buyerPassport",
+    label: "Hộ chiếu",
+    isDefault: false,
+    isVisible: false,
+    width: 140,
+  },
+  {
+    id: "totalAmountInWords",
+    label: "Tổng tiền bằng chữ",
+    isDefault: false,
+    isVisible: false,
+    width: 300,
+  },
 ];
 
 // ─────────────────────────────────────────────
@@ -111,9 +284,11 @@ export function InvoicePageClient() {
   const [series, setSeries] = useState<string>("");
 
   // ── Columns State ──
-  const [columnsConfig, setColumnsConfig] = useState<ColumnConfig[]>(INITIAL_COLUMNS);
+  const [columnsConfig, setColumnsConfig] =
+    useState<ColumnConfig[]>(INITIAL_COLUMNS);
   const [isColumnDialogOpen, setIsColumnDialogOpen] = useState(false);
-  const [draftColumns, setDraftColumns] = useState<ColumnConfig[]>(INITIAL_COLUMNS);
+  const [draftColumns, setDraftColumns] =
+    useState<ColumnConfig[]>(INITIAL_COLUMNS);
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null);
 
   // Load saved config on mount
@@ -126,7 +301,7 @@ export function InvoicePageClient() {
         const timer = setTimeout(() => {
           setColumnsConfig(parsedConfig);
         }, 0);
-        
+
         return () => clearTimeout(timer);
       } catch (e) {
         console.error("Invalid column config in local storage");
@@ -172,61 +347,162 @@ export function InvoicePageClient() {
     setDraftColumns([...INITIAL_COLUMNS]);
   };
 
-  const handleDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+  const handleDragStart = (
+    e: React.DragEvent<HTMLDivElement>,
+    index: number,
+  ) => {
     setDraggedIdx(index);
     e.dataTransfer.effectAllowed = "move";
   };
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+  const handleDragOver = (
+    e: React.DragEvent<HTMLDivElement>,
+    index: number,
+  ) => {
     e.preventDefault();
     if (draggedIdx === null || draggedIdx === index) return;
-    
+
     const newCols = [...draftColumns];
     const draggedItem = newCols[draggedIdx];
     newCols.splice(draggedIdx, 1);
     newCols.splice(index, 0, draggedItem);
-    
+
     setDraggedIdx(index);
     setDraftColumns(newCols);
   };
 
   // Render content based on column id
   const renderCellContent = (invoice: Invoice, colId: string) => {
-    switch(colId) {
-      case 'status': return <Badge variant="outline" className="whitespace-nowrap">{invoice.status || "N/A"}</Badge>;
-      case 'taxSubmissionStatus': return <Badge variant={invoice.taxSubmissionStatus === "Thành công" ? "default" : "secondary"} className="whitespace-nowrap">{invoice.taxSubmissionStatus || "N/A"}</Badge>;
-      case 'idSign': return <span className="text-muted-foreground">{invoice.idSign || ""}</span>;
-      case 'invoiceSeries': return <span className="font-medium">{invoice.invoiceSeries}</span>;
-      case 'invoiceIssuedDate': return invoice.invoiceIssuedDate ? formatDate(invoice.invoiceIssuedDate) : "";
-      case 'invoiceNumber': return <span className="font-bold text-primary">{invoice.invoiceNumber}</span>;
-      case 'buyerTaxCode': return invoice.buyerTaxCode;
-      case 'buyerName': return invoice.buyerDisplayName || invoice.buyerLegalName;
-      case 'totalAmount': return <span className="font-semibold tabular-nums">{formatCurrency(invoice.totalAmount)}</span>;
-      case 'buyerEmail': return <span className="text-muted-foreground">{invoice.buyerEmail}</span>;
-      case 'buyerCitizenId': return invoice.buyerCitizenId;
-      case 'lookupCode': return <span className="font-mono text-xs">{invoice.lookupCode}</span>;
-      case 'paymentMethodName': return invoice.paymentMethodName;
-      case 'orderNumber': return invoice.orderNumber || "";
+    switch (colId) {
+      case "idSign":
+        return (
+          <span className="text-muted-foreground">{invoice.idSign || ""}</span>
+        );
+      case "invoiceSeries":
+        return <span className="font-medium">{invoice.invoiceSeries}</span>;
+      case "invoiceIssuedDate":
+        return invoice.invoiceIssuedDate
+          ? formatDate(invoice.invoiceIssuedDate)
+          : "";
+      case "invoiceNumber":
+        return (
+          <span className="font-bold text-primary">
+            {invoice.invoiceNumber}
+          </span>
+        );
+      case "buyerTaxCode":
+        return invoice.buyerTaxCode;
+      case "buyerName":
+        return invoice.buyerDisplayName || invoice.buyerLegalName;
+      case "totalAmount":
+        return (
+          <span className="font-semibold tabular-nums">
+            {formatCurrency(invoice.totalAmount)}
+          </span>
+        );
+      case "buyerEmail":
+        return (
+          <span className="text-muted-foreground">{invoice.buyerEmail}</span>
+        );
+      case "buyerCitizenId":
+        return invoice.buyerCitizenId;
+      case "lookupCode":
+        return <span className="font-mono text-xs">{invoice.lookupCode}</span>;
+      case "paymentMethodName":
+        return invoice.paymentMethodName;
+      case "orderNumber":
+        return invoice.orderNumber || "";
       // Bổ sung
-      case 'creator': return "N/A"; 
-      case 'totalAmountWithoutVat': return formatCurrency(invoice.totalAmountWithoutVat || 0);
-      case 'vatAmount': return formatCurrency(invoice.vatAmount || 0);
-      case 'sellerAddress': return "N/A"; 
-      case 'currency': return "VND"; 
-      case 'exchangeRate': return invoice.exchangeRate || "";
-      case 'buyerLegalName': return invoice.buyerLegalName;
-      case 'buyerAddressLine': return invoice.buyerAddressLine;
-      case 'storeName': return "N/A";
-      case 'storeAddress': return invoice.storeAddress;
-      case 'storeId': return "N/A";
-      case 'buyerBudgetRelationCode': return invoice.buyerBudgetRelationCode;
-      case 'buyerPassport': return invoice.buyerPassport;
-      case 'totalAmountInWords': return "N/A"; 
-      default: return "";
+      case "creator":
+        return "N/A";
+      case "totalAmountWithoutVat":
+        return formatCurrency(invoice.totalAmountWithoutVat || 0);
+      case "vatAmount":
+        return formatCurrency(invoice.vatAmount || 0);
+      case "sellerAddress":
+        return "N/A";
+      case "currency":
+        return "VND";
+      case "exchangeRate":
+        return invoice.exchangeRate || "";
+      case "buyerLegalName":
+        return invoice.buyerLegalName;
+      case "buyerAddressLine":
+        return invoice.buyerAddressLine;
+      case "storeName":
+        return "N/A";
+      case "storeAddress":
+        return invoice.storeAddress;
+      case "storeId":
+        return "N/A";
+      case "buyerBudgetRelationCode":
+        return invoice.buyerBudgetRelationCode;
+      case "buyerPassport":
+        return invoice.buyerPassport;
+      case "totalAmountInWords":
+        return "N/A";
+      case "status": {
+        let statusClassName = "";
+        switch (invoice.status) {
+          case "Gốc":
+            statusClassName =
+              "bg-green-500 text-white hover:bg-green-600 border-transparent";
+            break;
+          case "Thay thế":
+            statusClassName =
+              "bg-orange-500 text-white hover:bg-orange-600 border-transparent";
+            break;
+          case "Điều chỉnh":
+            statusClassName =
+              "bg-yellow-500 text-black hover:bg-yellow-600 border-transparent";
+            break;
+          default:
+            statusClassName = "outline"; // Mặc định nếu không khớp
+        }
+        return (
+          <Badge className={cn("whitespace-nowrap", statusClassName)}>
+            {invoice.status || "N/A"}
+          </Badge>
+        );
+      }
+      case "taxSubmissionStatus": {
+        let cqtClassName = "";
+        let variant: "default" | "secondary" | "destructive" | "outline" =
+          "outline";
+        switch (invoice.taxSubmissionStatus) {
+          case "Thành công":
+            cqtClassName = "bg-green-600 text-white hover:bg-green-700"; // Xanh lá cây
+            variant = "default";
+            break;
+          case "Đã ký":
+            cqtClassName = "bg-blue-500 text-white hover:bg-blue-600"; // Xanh dương
+            variant = "default";
+            break;
+          case "Có lỗi":
+            variant = "destructive"; // Màu đỏ (đã có sẵn trong Badge variant destructive)
+            break;
+          case "Chờ ký":
+            cqtClassName =  "bg-orange-500 text-white hover:bg-orange-600 border-transparent"; // Cam
+            variant = "default";
+          break;
+          default:
+            variant = "secondary";
+        }
+        return (
+          <Badge
+            variant={variant}
+            className={cn("whitespace-nowrap", cqtClassName)}
+          >
+            {invoice.taxSubmissionStatus || "N/A"}
+          </Badge>
+        );
+      }
+      default:
+        return "";
     }
   };
 
-  const visibleColumns = columnsConfig.filter(c => c.isVisible);
+  const visibleColumns = columnsConfig.filter((c) => c.isVisible);
 
   return (
     <div className="space-y-6">
@@ -266,8 +542,14 @@ export function InvoicePageClient() {
         </Select>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw className={cn("h-4 w-4 mr-2", isFetching && "animate-spin")} />
+          <Button
+            variant="outline"
+            onClick={() => refetch()}
+            disabled={isFetching}
+          >
+            <RefreshCw
+              className={cn("h-4 w-4 mr-2", isFetching && "animate-spin")}
+            />
             Tải lại
           </Button>
           <Button variant="outline">
@@ -299,12 +581,18 @@ export function InvoicePageClient() {
             <TableHeader>
               <TableRow className="hover:bg-transparent">
                 {visibleColumns.map((col) => (
-                  <TableHead 
-                    key={col.id} 
-                    className={cn(col.align === 'right' && 'text-right')}
-                    style={{ width: col.width, minWidth: col.width, maxWidth: col.width }}
+                  <TableHead
+                    key={col.id}
+                    className={cn(col.align === "right" && "text-right")}
+                    style={{
+                      width: col.width,
+                      minWidth: col.width,
+                      maxWidth: col.width,
+                    }}
                   >
-                    <div className="truncate" title={col.label}>{col.label}</div>
+                    <div className="truncate" title={col.label}>
+                      {col.label}
+                    </div>
                   </TableHead>
                 ))}
                 {/* Cột thao tác */}
@@ -317,7 +605,7 @@ export function InvoicePageClient() {
             <TableBody>
               {!isLoading && allInvoices.length === 0 && (
                 <TableRow>
-                  <TableCell 
+                  <TableCell
                     colSpan={visibleColumns.length + 1}
                     className="h-12 text-center text-muted-foreground"
                   >
@@ -329,24 +617,38 @@ export function InvoicePageClient() {
                 allInvoices.map((invoice) => (
                   <TableRow key={invoice.id} className="group">
                     {visibleColumns.map((col) => (
-                      <TableCell 
-                        key={col.id} 
-                        className={cn(col.align === 'right' && 'text-right')}
-                        style={{ width: col.width, minWidth: col.width, maxWidth: col.width }}
+                      <TableCell
+                        key={col.id}
+                        className={cn(col.align === "right" && "text-right")}
+                        style={{
+                          width: col.width,
+                          minWidth: col.width,
+                          maxWidth: col.width,
+                        }}
                       >
-                        <div className="truncate" title={String(renderCellContent(invoice, col.id) || "")}>
+                        <div
+                          className="truncate"
+                          title={String(
+                            renderCellContent(invoice, col.id) || "",
+                          )}
+                        >
                           {renderCellContent(invoice, col.id)}
                         </div>
                       </TableCell>
                     ))}
-                    
+
                     {/* Cột thao tác (Sticky Right) */}
                     <TableCell className="text-right sticky right-0 bg-white group-hover:bg-muted/50 transition-colors shadow-[-4px_0_6px_-4px_rgba(0,0,0,0.1)] z-10">
                       <div className="flex items-center justify-end gap-1">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50">
-                              <Send className="h-4 w-4" />
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              disabled={invoice.taxSubmissionStatus !== "Chờ ký"}
+                            >
+                              <UserPen className="h-4 w-4" />
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>Ký và gửi CQT</TooltipContent>
@@ -354,7 +656,11 @@ export function InvoicePageClient() {
 
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-600 hover:text-slate-900 hover:bg-slate-100">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                            >
                               <Eye className="h-4 w-4" />
                             </Button>
                           </TooltipTrigger>
@@ -388,9 +694,9 @@ export function InvoicePageClient() {
                     </SelectTrigger>
                     <SelectContent>
                       {PAGE_LIMIT_OPTIONS.map((n) => (
-                         <SelectItem key={n} value={String(n)}>
-                           {n}
-                         </SelectItem>
+                        <SelectItem key={n} value={String(n)}>
+                          {n}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -409,11 +715,25 @@ export function InvoicePageClient() {
               </div>
 
               <div className="flex items-center gap-1">
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setPage(1)} disabled={page === 1} title="Trang đầu">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setPage(1)}
+                  disabled={page === 1}
+                  title="Trang đầu"
+                >
                   <ChevronLeft className="h-3.5 w-3.5 -mr-1" />
                   <ChevronLeft className="h-3.5 w-3.5" />
                 </Button>
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} title="Trang trước">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  title="Trang trước"
+                >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
 
@@ -425,17 +745,37 @@ export function InvoicePageClient() {
                     else if (page >= totalPages - 2) p = totalPages - 4 + i;
                     else p = page - 2 + i;
                     return (
-                      <Button key={p} variant={p === page ? "default" : "outline"} size="icon" className="h-8 w-8 text-xs font-medium" onClick={() => setPage(p)}>
+                      <Button
+                        key={p}
+                        variant={p === page ? "default" : "outline"}
+                        size="icon"
+                        className="h-8 w-8 text-xs font-medium"
+                        onClick={() => setPage(p)}
+                      >
                         {p}
                       </Button>
                     );
                   })}
                 </div>
 
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages} title="Trang sau">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                  title="Trang sau"
+                >
                   <ChevronRight className="h-4 w-4" />
                 </Button>
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setPage(totalPages)} disabled={page === totalPages} title="Trang cuối">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8"
+                  onClick={() => setPage(totalPages)}
+                  disabled={page === totalPages}
+                  title="Trang cuối"
+                >
                   <ChevronRight className="h-3.5 w-3.5 -mr-1" />
                   <ChevronRight className="h-3.5 w-3.5" />
                 </Button>
@@ -451,10 +791,11 @@ export function InvoicePageClient() {
           <DialogHeader>
             <DialogTitle>Cài đặt cột hiển thị</DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
-              Kéo thả để sắp xếp, tích chọn để hiển thị và thiết lập độ rộng cột.
+              Kéo thả để sắp xếp, tích chọn để hiển thị và thiết lập độ rộng
+              cột.
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="flex-1 overflow-y-auto py-4 pr-1">
             <div className="space-y-2">
               {draftColumns.map((col, idx) => (
@@ -466,7 +807,7 @@ export function InvoicePageClient() {
                   onDragEnd={() => setDraggedIdx(null)}
                   className={cn(
                     "flex items-center gap-3 p-2 bg-background border rounded-md cursor-move transition-colors",
-                    draggedIdx === idx && "opacity-50 border-primary"
+                    draggedIdx === idx && "opacity-50 border-primary",
                   )}
                 >
                   <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab shrink-0" />
@@ -480,10 +821,13 @@ export function InvoicePageClient() {
                     }}
                     className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer shrink-0"
                   />
-                  <span className="text-sm font-medium flex-1 truncate select-none" title={col.label}>
+                  <span
+                    className="text-sm font-medium flex-1 truncate select-none"
+                    title={col.label}
+                  >
                     {col.label}
                   </span>
-                  
+
                   {/* Nhập số lượng px độ rộng */}
                   <div className="flex items-center gap-1 w-20 shrink-0">
                     <Input
@@ -509,12 +853,13 @@ export function InvoicePageClient() {
               Đặt lại
             </Button>
             <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={() => setIsColumnDialogOpen(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setIsColumnDialogOpen(false)}
+              >
                 Huỷ
               </Button>
-              <Button onClick={handleSaveColumns}>
-                Lưu cài đặt
-              </Button>
+              <Button onClick={handleSaveColumns}>Lưu cài đặt</Button>
             </div>
           </DialogFooter>
         </DialogContent>
