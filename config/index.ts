@@ -10,9 +10,10 @@ export const API_ENDPOINTS = {
   REFRESH_TOKEN: "/auth/refresh-token",
 
   // User
-  USER_INFO: "/user",
+  USER_INFO: "/user/me",
 
   // Invoice
+  SERIES: "/invoice/serials",
   INVOICES: "/invoice",
   INVOICE_DETAIL: (id: string) => `/invoice/${id}`,
 };

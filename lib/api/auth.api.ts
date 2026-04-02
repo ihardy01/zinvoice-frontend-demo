@@ -1,14 +1,14 @@
 import axiosInstance from "@/lib/api/axios";
 import { API_ENDPOINTS } from "@/config";
-import { LoginRequest, LoginResponse, UserInfo } from "@/types";
+import { LoginRequest, LoginResponse, UserInfo, ApiResponse } from "@/types";
 
 export const authApi = {
   login: async (data: LoginRequest): Promise<LoginResponse> => {
-    const response = await axiosInstance.post<LoginResponse>(
+    const response = await axiosInstance.post<ApiResponse<LoginResponse>>(
       API_ENDPOINTS.LOGIN,
       data,
     );
-    return response.data;
+    return response.data.metadata;
   },
 
   logout: async (): Promise<void> => {

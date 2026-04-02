@@ -36,7 +36,7 @@ const NAV_ITEMS = [
   },
 ];
 
-export function Sidebar() {
+export default function Sidebar() {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const { mutate: logout, isPending } = useLogout();

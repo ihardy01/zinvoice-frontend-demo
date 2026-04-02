@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useLogout } from "@/hooks/use-auth";
 
-export function Header() {
+export default function Header() {
   const { user } = useAuthStore();
   const { mutate: logout } = useLogout();
 

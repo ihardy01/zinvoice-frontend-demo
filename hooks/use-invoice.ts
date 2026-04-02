@@ -1,36 +1,28 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 import { invoiceApi } from "@/lib/api/invoice.api";
 import {
-  CreateInvoiceRequest,
-  UpdateInvoiceRequest,
-  PaginationParams,
+  PaginationInvoiceParams,
 } from "@/types";
 
 export const INVOICE_QUERY_KEYS = {
   all: ["invoices"] as const,
   lists: () => [...INVOICE_QUERY_KEYS.all, "list"] as const,
-  list: (params: PaginationParams) =>
+  list: (params: PaginationInvoiceParams) =>
     [...INVOICE_QUERY_KEYS.lists(), params] as const,
   details: () => [...INVOICE_QUERY_KEYS.all, "detail"] as const,
   detail: (id: string) => [...INVOICE_QUERY_KEYS.details(), id] as const,
 };
 
-// -----------------------------------------------
-// useInvoices - list with pagination
-// -----------------------------------------------
-export function useInvoices(params: PaginationParams) {
+export function useInvoices(params: PaginationInvoiceParams, enabled: boolean = true) {
   return useQuery({
     queryKey: INVOICE_QUERY_KEYS.list(params),
     queryFn: () => invoiceApi.getInvoices(params),
     staleTime: 30 * 1000,
     placeholderData: (prev) => prev,
+    enabled: enabled,
   });
 }
 
-// -----------------------------------------------
-// useInvoice - single by id
-// -----------------------------------------------
 export function useInvoice(id: string) {
   return useQuery({
     queryKey: INVOICE_QUERY_KEYS.detail(id),
@@ -39,59 +31,11 @@ export function useInvoice(id: string) {
   });
 }
 
-// -----------------------------------------------
-// useCreateInvoice
-// -----------------------------------------------
-export function useCreateInvoice() {
-  const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (data: CreateInvoiceRequest) => invoiceApi.createInvoice(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: INVOICE_QUERY_KEYS.lists() });
-      toast.success("Tạo hoá đơn thành công!");
-    },
-    onError: () => {
-      toast.error("Không thể tạo hoá đơn. Vui lòng thử lại.");
-    },
-  });
-}
-
-// -----------------------------------------------
-// useUpdateInvoice
-// -----------------------------------------------
-export function useUpdateInvoice() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: UpdateInvoiceRequest) => invoiceApi.updateInvoice(data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: INVOICE_QUERY_KEYS.lists() });
-      queryClient.invalidateQueries({
-        queryKey: INVOICE_QUERY_KEYS.detail(variables.id),
-      });
-      toast.success("Cập nhật hoá đơn thành công!");
-    },
-    onError: () => {
-      toast.error("Không thể cập nhật hoá đơn. Vui lòng thử lại.");
-    },
-  });
-}
-
-// -----------------------------------------------
-// useDeleteInvoice
-// -----------------------------------------------
-export function useDeleteInvoice() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: string) => invoiceApi.deleteInvoice(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: INVOICE_QUERY_KEYS.lists() });
-      toast.success("Xoá hoá đơn thành công!");
-    },
-    onError: () => {
-      toast.error("Không thể xoá hoá đơn. Vui lòng thử lại.");
-    },
+export function useInvoiceSerials() {
+  return useQuery({
+    queryKey: ["invoice-serials"],
+    queryFn: () => invoiceApi.getSerials(),
+    staleTime: 5 * 60 * 1000, // Cache 5 phút
   });
 }
