@@ -30,12 +30,11 @@ export const invoiceSchema = z.object({
     .email("Email không hợp lệ"),
   amount: z
     .number({
-      required_error: "Số tiền không được để trống",
-      invalid_type_error: "Số tiền phải là số",
+      error: "Số tiền không được để trống"
     })
     .positive("Số tiền phải lớn hơn 0"),
   status: z.enum(["PENDING", "PAID", "CANCELLED", "OVERDUE"], {
-    required_error: "Vui lòng chọn trạng thái",
+    error: "Vui lòng chọn trạng thái",
   }),
   issueDate: z.string().min(1, "Ngày phát hành không được để trống"),
   dueDate: z.string().min(1, "Ngày đến hạn không được để trống"),
