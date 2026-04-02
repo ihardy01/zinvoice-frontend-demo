@@ -31,4 +31,24 @@ export const invoiceApi = {
     const response = await axiosInstance.get<ApiResponse<InvoiceSerial[]>>(API_ENDPOINTS.SERIES);
     return response.data.metadata;
   },
+  printInvoice: async (invoiceId: string, type: string = "html"): Promise<string> => {
+    // Đảm bảo endpoint khớp với cấu hình API của bạn
+    const response = await axiosInstance.get(
+      `/invoice/print`, 
+      { params: { invoiceId, type } }
+    );
+    // Tuỳ thuộc vào API trả về raw HTML hay bọc trong object. Giả sử trả về bọc trong metadata hoặc raw data:
+    return response.data?.metadata || response.data;
+  },
+  downloadPdf: async (invoiceId: string): Promise<Blob> => {
+    const response = await axiosInstance.get(`/invoice/print`, {
+      params: { 
+        invoiceId, 
+        type: "binary" // Chuyển sang binary theo yêu cầu
+      },
+      // Bắt buộc phải có responseType: "blob" để Axios hiểu và xử lý đúng file nhị phân
+      responseType: "blob", 
+    });
+    return response.data;
+  },
 };

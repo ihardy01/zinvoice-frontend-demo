@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { invoiceApi } from "@/lib/api/invoice.api";
 import {
   PaginationInvoiceParams,
@@ -37,5 +37,19 @@ export function useInvoiceSerials() {
     queryKey: ["invoice-serials"],
     queryFn: () => invoiceApi.getSerials(),
     staleTime: 5 * 60 * 1000, // Cache 5 phút
+  });
+}
+
+
+export function usePrintInvoice() {
+  return useMutation({
+    mutationFn: ({ invoiceId, type }: { invoiceId: string; type?: string }) => 
+      invoiceApi.printInvoice(invoiceId, type),
+  });
+}
+
+export function useDownloadPdfInvoice() {
+  return useMutation({
+    mutationFn: (invoiceId: string) => invoiceApi.downloadPdf(invoiceId),
   });
 }
